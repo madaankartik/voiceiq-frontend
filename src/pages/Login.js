@@ -38,7 +38,6 @@ function Login() {
 
   return (
     <div className="fixed inset-0 flex w-full h-full overflow-hidden">
-      {/* Left Side - Design/Visual */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-primary/90 to-primary/80 h-full">
         <div className="relative w-full h-full overflow-hidden">
           <div className="absolute inset-0 opacity-10">
@@ -99,10 +98,8 @@ function Login() {
         </div>
       </div>
 
-      {/* Right Side - Login Form */}
       <div className="flex-1 flex items-center justify-center bg-background w-full h-full overflow-y-auto">
         <div className="w-full max-w-md p-6">
-          {/* Mobile Header */}
           <div className="lg:hidden text-center space-y-3 mb-6">
             <div className="flex items-center justify-center gap-3">
               <div className="p-3 rounded-xl bg-primary/10">

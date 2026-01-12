@@ -1,8 +1,3 @@
-/**
- * Table Component
- * Same as Gistly's Table component
- */
-
 import * as React from "react";
 import { cn } from "../../lib/utils";
 

@@ -1,9 +1,3 @@
-/**
- * Main Entry Point
- * 
- * This is where React app starts
- */
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';

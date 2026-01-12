@@ -63,7 +63,6 @@ function Navigation() {
     });
   };
 
-  // Don't show navigation on auth pages
   if (location.pathname === '/login' || location.pathname === '/signup') {
     return null;
   }

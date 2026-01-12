@@ -1,8 +1,3 @@
-/**
- * Card Component
- * Same as Gistly's Card component
- */
-
 import * as React from "react";
 import { cn } from "../../lib/utils";
 

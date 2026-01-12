@@ -1,9 +1,3 @@
-/**
- * Upload Page
- * 
- * Allows users to upload call recordings
- * Using same UI style as Gistly
- */
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -51,8 +45,7 @@ function Upload() {
 
     try {
       const response = await uploadCall(file);
-      
-      // Only show success if we got a valid response
+
       if (response && (response.success || response.callId)) {
         toast.success('Call uploaded successfully! Processing in background.');
         
@@ -71,7 +64,7 @@ function Upload() {
       
     } catch (err) {
       console.error('Upload error:', err);
-      // Only show error if it's a real error (not a navigation error)
+      
       if (err.response) {
         toast.error(
           err.response?.data?.message || 

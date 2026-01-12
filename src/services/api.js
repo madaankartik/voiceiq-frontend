@@ -9,7 +9,6 @@ const api = axios.create({
   }
 });
 
-// Add token to requests
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -18,7 +17,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Auth functions
 export const signup = async (email, password, name) => {
   const response = await api.post('/auth/signup', { email, password, name });
   return response.data;
@@ -39,7 +37,6 @@ export const getCurrentUser = async () => {
   return response.data;
 };
 
-// Call functions
 export const uploadCall = async (file) => {
   const formData = new FormData();
   formData.append('audio', file);

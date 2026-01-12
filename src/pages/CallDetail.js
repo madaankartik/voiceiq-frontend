@@ -1,10 +1,3 @@
-/**
- * Call Detail Page
- * 
- * Layout: Transcript on left (2/3), Tabs (Summary/Scores) on right (1/3)
- * Same as Gistly project
- */
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getCall } from '../services/api';
@@ -40,9 +33,8 @@ function CallDetail() {
       setScores(data.scores || []);
       setError(null);
       
-      // Set default tab based on available data
       if (data.call?.summary && data.scores?.length > 0) {
-        setActiveTab('summary'); // Default to summary
+        setActiveTab('summary');
       } else if (data.scores?.length > 0) {
         setActiveTab('scores');
       } else if (data.call?.summary) {
@@ -77,15 +69,13 @@ function CallDetail() {
   const getTranscript = () => {
     if (!call?.transcript) return null;
     
-    // Check if transcript is JSON (with segments) or plain text
     if (typeof call.transcript === 'string') {
       try {
         const parsed = JSON.parse(call.transcript);
         if (parsed.segments && Array.isArray(parsed.segments)) {
-          return parsed; // Return parsed JSON with segments
+          return parsed;
         }
       } catch {
-        // Not JSON, treat as plain text
         return { text: call.transcript, segments: null };
       }
     }
@@ -156,7 +146,6 @@ function CallDetail() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={() => navigate('/')}>
@@ -176,9 +165,7 @@ function CallDetail() {
         </span>
       </div>
 
-      {/* Two Column Layout: Transcript (left) and Tabs (right) */}
       <div className="flex flex-col lg:flex-row gap-4">
-        {/* Left Column: Transcript (2/3 width) */}
         <div className="flex flex-col w-full lg:w-2/3 gap-4">
           {(() => {
             const transcriptData = getTranscript();
@@ -201,10 +188,8 @@ function CallDetail() {
               );
             }
 
-            // Check if we have segments (speaker diarization)
             const hasSegments = transcriptData.segments && transcriptData.segments.length > 0;
             
-            // Speaker icons mapping
             const speakerIcons = {
               'Agent': Headphones,
               'Customer': User,
@@ -223,7 +208,6 @@ function CallDetail() {
                 <CardContent className="pb-6">
                   <div className="max-h-[600px] overflow-y-auto mb-4">
                     {hasSegments ? (
-                      // Display segments with speaker diarization (like Gistly)
                       <div className="space-y-2">
                         {transcriptData.segments.map((segment, idx) => {
                           const SpeakerIcon = speakerIcons[segment.speaker] || User;
@@ -253,7 +237,6 @@ function CallDetail() {
                         })}
                       </div>
                     ) : (
-                      // Fallback to plain text display
                       <div className="p-4 bg-muted rounded-lg">
                         {(transcriptData.text || '').split('\n').map((line, idx) => (
                           <p key={idx} className="mb-2 text-sm leading-relaxed">
@@ -269,7 +252,6 @@ function CallDetail() {
           })()}
         </div>
 
-        {/* Right Column: Tabs (Summary/Scores) (1/3 width) */}
         <div className="flex flex-col w-full lg:w-1/3 gap-4">
           {(hasSummary || hasScores) && (
             <Card>
@@ -285,7 +267,6 @@ function CallDetail() {
                   </TabsList>
                 </CardHeader>
                 <CardContent className="pb-6">
-                  {/* Summary Tab */}
                   {hasSummary && (
                     <TabsContent value="summary" className="space-y-4 mt-0">
                       {summary.agenda && (
@@ -330,7 +311,6 @@ function CallDetail() {
                     </TabsContent>
                   )}
 
-                  {/* Scores Tab */}
                   {hasScores && (
                     <TabsContent value="scores" className="mt-0">
                       <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 pb-4">
@@ -376,8 +356,7 @@ function CallDetail() {
           )}
         </div>
       </div>
-
-      {/* Processing Status */}
+            
       {(call.status === 'transcribing' || call.status === 'processing') && (
         <Card className="border-yellow-200 bg-yellow-50">
           <CardContent className="pt-6">
