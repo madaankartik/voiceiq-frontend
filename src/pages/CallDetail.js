@@ -11,7 +11,7 @@ import { getCall } from '../services/api';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { ArrowLeft, FileText, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, FileText, CheckCircle, XCircle, Loader2, Headphones, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 function CallDetail() {
@@ -72,6 +72,31 @@ function CallDetail() {
       }
     }
     return call.summary;
+  };
+
+  const getTranscript = () => {
+    if (!call?.transcript) return null;
+    
+    // Check if transcript is JSON (with segments) or plain text
+    if (typeof call.transcript === 'string') {
+      try {
+        const parsed = JSON.parse(call.transcript);
+        if (parsed.segments && Array.isArray(parsed.segments)) {
+          return parsed; // Return parsed JSON with segments
+        }
+      } catch {
+        // Not JSON, treat as plain text
+        return { text: call.transcript, segments: null };
+      }
+    }
+    return call.transcript;
+  };
+
+  const formatTime = (seconds) => {
+    if (!seconds && seconds !== 0) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const getStatusColor = (status) => {
@@ -155,40 +180,93 @@ function CallDetail() {
       <div className="flex flex-col lg:flex-row gap-4">
         {/* Left Column: Transcript (2/3 width) */}
         <div className="flex flex-col w-full lg:w-2/3 gap-4">
-          {call.transcript ? (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Transcript
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pb-6">
-                <div className="max-h-[600px] overflow-y-auto p-4 bg-muted rounded-lg mb-4">
-                  {call.transcript.split('\n').map((line, idx) => (
-                    <p key={idx} className="mb-2 text-sm leading-relaxed">
-                      {line}
-                    </p>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <CardContent className="pt-6 text-center py-12">
-                <div className="text-muted-foreground">
-                  {call.status === 'transcribing' || call.status === 'processing' ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      <p>Transcription in progress...</p>
+          {(() => {
+            const transcriptData = getTranscript();
+            if (!transcriptData) {
+              return (
+                <Card>
+                  <CardContent className="pt-6 text-center py-12">
+                    <div className="text-muted-foreground">
+                      {call.status === 'transcribing' || call.status === 'processing' ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          <p>Transcription in progress...</p>
+                        </div>
+                      ) : (
+                        <p>Transcript not available</p>
+                      )}
                     </div>
-                  ) : (
-                    <p>Transcript not available</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                  </CardContent>
+                </Card>
+              );
+            }
+
+            // Check if we have segments (speaker diarization)
+            const hasSegments = transcriptData.segments && transcriptData.segments.length > 0;
+            
+            // Speaker icons mapping
+            const speakerIcons = {
+              'Agent': Headphones,
+              'Customer': User,
+              'Lead': User,
+              'Sales Agent': Headphones
+            };
+
+            return (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Transcript
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pb-6">
+                  <div className="max-h-[600px] overflow-y-auto mb-4">
+                    {hasSegments ? (
+                      // Display segments with speaker diarization (like Gistly)
+                      <div className="space-y-2">
+                        {transcriptData.segments.map((segment, idx) => {
+                          const SpeakerIcon = speakerIcons[segment.speaker] || User;
+                          return (
+                            <div
+                              key={idx}
+                              className="flex rounded-lg gap-3 p-4 hover:bg-accent transition-colors"
+                            >
+                              <div className="py-0.5 flex-shrink-0">
+                                <SpeakerIcon className="h-4 w-4 text-muted-foreground" />
+                              </div>
+                              <div className="w-full flex flex-col gap-1">
+                                <div className="flex flex-row justify-between items-center">
+                                  <strong className="text-sm font-semibold">
+                                    {segment.speaker}
+                                  </strong>
+                                  <p className="text-xs text-muted-foreground">
+                                    {formatTime(segment.start)}
+                                  </p>
+                                </div>
+                                <p className="text-sm leading-relaxed text-foreground">
+                                  {segment.text}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      // Fallback to plain text display
+                      <div className="p-4 bg-muted rounded-lg">
+                        {(transcriptData.text || '').split('\n').map((line, idx) => (
+                          <p key={idx} className="mb-2 text-sm leading-relaxed">
+                            {line}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })()}
         </div>
 
         {/* Right Column: Tabs (Summary/Scores) (1/3 width) */}
